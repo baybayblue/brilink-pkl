@@ -7,12 +7,15 @@
         min-height: 120px;
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         border-radius: .5rem;
+        display: flex;
+        flex-direction: column;
     }
     .info-box:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
     }
-    .info-box-content {
+    .info-box .info-box-content {
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -23,14 +26,15 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2rem !important;
+        font-size: 2.2rem !important;
     }
-    .bg-gradient-primary { background: linear-gradient(135deg, #007bff, #6610f2) !important; }
-    .bg-gradient-info { background: linear-gradient(135deg, #17a2b8, #27c8a9) !important; }
-    .bg-gradient-success { background: linear-gradient(135deg, #28a745, #218838) !important; }
+    .bg-gradient-primary { background: linear-gradient(135deg, #007bff, #6610f2) !important; color: #fff; }
+    .bg-gradient-info { background: linear-gradient(135deg, #17a2b8, #27c8a9) !important; color: #fff; }
+    .bg-gradient-success { background: linear-gradient(135deg, #28a745, #218838) !important; color: #fff; }
+    .bg-gradient-teal { background: linear-gradient(135deg, #20c997, #1fab89) !important; color: #fff; }
     .bg-gradient-warning { background: linear-gradient(135deg, #ffc107, #fd7e14) !important; color: #fff !important; }
-    .bg-gradient-danger { background: linear-gradient(135deg, #dc3545, #c82333) !important; }
-    .bg-gradient-secondary { background: linear-gradient(135deg, #6c757d, #343a40) !important; }
+    .bg-gradient-danger { background: linear-gradient(135deg, #dc3545, #c82333) !important; color: #fff; }
+    .bg-gradient-secondary { background: linear-gradient(135deg, #6c757d, #343a40) !important; color: #fff; }
 </style>
 @endpush
 
@@ -38,7 +42,7 @@
     {{-- Sapaan personal dan tanggal --}}
     <div class="row mb-2">
         <div class="col-sm-6">
-            <h1 class="m-0">Selamat Datang, {{ Auth::user()->username ?? 'Pengguna' }}!</h1>
+            <h1 class="m-0">Selamat Datang, {{ Auth::user()->name ?? 'Pengguna' }}!</h1>
             <small class="text-muted">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</small>
         </div>
         <div class="col-sm-6">
@@ -50,65 +54,65 @@
 @endsection
 
 @section('content')
-    {{-- Baris untuk Info Box --}}
+    {{-- Baris untuk Info Box yang Telah Disesuaikan --}}
     <div class="row">
-        {{-- Total Omset Hari Ini --}}
+        {{-- Total Pendapatan Hari Ini (Uang Masuk) --}}
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="info-box shadow-sm">
                 <span class="info-box-icon bg-gradient-success"><i class="fas fa-hand-holding-usd"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Omset Hari Ini</span>
-                    <span class="info-box-number">Rp{{ number_format($totalOmsetHariIni, 0, ',', '.') }}</span>
+                    <span class="info-box-text">Pendapatan Hari Ini (Uang Masuk)</span>
+                    <span class="info-box-number">Rp{{ number_format($pendapatanHariIni ?? 0, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
-        {{-- Total Pengeluaran Hari Ini --}}
+        {{-- Keuntungan Admin BRILink Hari Ini --}}
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="info-box shadow-sm">
-                <span class="info-box-icon bg-gradient-danger"><i class="fas fa-arrow-circle-down"></i></span>
+                <span class="info-box-icon bg-gradient-info"><i class="fas fa-university"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Pengeluaran Hari Ini</span>
-                    <span class="info-box-number">Rp{{ number_format($totalPengeluaranHariIni, 0, ',', '.') }}</span>
+                    <span class="info-box-text">Keuntungan Admin BRILink (Hari Ini)</span>
+                    <span class="info-box-number">Rp{{ number_format($keuntunganAdminHariIni ?? 0, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
-        {{-- Total Konsumen --}}
+        {{-- Total Piutang Aktif --}}
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="info-box shadow-sm">
-                <span class="info-box-icon bg-gradient-warning"><i class="fas fa-users"></i></span>
+                <span class="info-box-icon bg-gradient-danger"><i class="fas fa-file-invoice-dollar"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Konsumen</span>
-                    <span class="info-box-number">{{ $totalKonsumen }}</span>
+                    <span class="info-box-text">Total Piutang Aktif</span>
+                    <span class="info-box-number">Rp{{ number_format($totalPiutang ?? 0, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
-        {{-- Orderan Hari Ini --}}
+        {{-- Total Orderan Hari Ini --}}
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="info-box shadow-sm">
-                <span class="info-box-icon bg-gradient-info"><i class="fas fa-receipt"></i></span>
+                <span class="info-box-icon bg-gradient-primary"><i class="fas fa-receipt"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Orderan Hari Ini</span>
-                    <span class="info-box-number">{{ $orderanHariIni }}</span>
+                    <span class="info-box-text">Total Transaksi Hari Ini</span>
+                    <span class="info-box-number">{{ $totalOrderanHariIni ?? 0 }}</span>
                 </div>
             </div>
         </div>
-        {{-- Orderan Bulan Ini --}}
+        {{-- Orderan Jasa/Produk Hari Ini --}}
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="info-box shadow-sm">
-                <span class="info-box-icon bg-gradient-secondary"><i class="fas fa-calendar-alt"></i></span>
+                <span class="info-box-icon bg-gradient-secondary"><i class="fas fa-box-open"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Orderan Bulan Ini</span>
-                    <span class="info-box-number">{{ $orderanBulanIni }}</span>
+                    <span class="info-box-text">Order Jasa/Produk (Hari Ini)</span>
+                    <span class="info-box-number">{{ $orderanJasaHariIni ?? 0 }}</span>
                 </div>
             </div>
         </div>
-        {{-- Orderan Total --}}
+        {{-- Transaksi BRILink Hari Ini --}}
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="info-box shadow-sm">
-                <span class="info-box-icon bg-gradient-primary"><i class="fas fa-chart-pie"></i></span>
+                <span class="info-box-icon bg-gradient-teal"><i class="fas fa-exchange-alt"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Orderan Total</span>
-                    <span class="info-box-number">{{ $totalOrderan }}</span>
+                    <span class="info-box-text">Transaksi BRILink (Hari Ini)</span>
+                    <span class="info-box-number">{{ $transaksiBrilinkHariIni ?? 0 }}</span>
                 </div>
             </div>
         </div>
@@ -149,16 +153,20 @@
                                         <small class="d-block text-muted">{{ $transaction->pelanggan->nama ?? 'Umum' }}</small>
                                     </td>
                                     <td class="text-right">
-                                        @php
-                                            $statusClass = $transaction->sisa == 0 ? 'badge-success' : ($transaction->uang_muka > 0 ? 'badge-warning' : 'badge-danger');
-                                            $statusText = $transaction->sisa == 0 ? 'Lunas' : ($transaction->uang_muka > 0 ? 'DP' : 'Belum Lunas');
-                                        @endphp
-                                        <span class="badge {{ $statusClass }}">{{ $statusText }}</span>
+                                        @if($transaction->tipe_transaksi == 'brilink')
+                                            <span class="badge badge-info">BRILink</span>
+                                        @else
+                                            @php
+                                                $statusClass = $transaction->sisa <= 0 ? 'badge-success' : ($transaction->uang_muka > 0 ? 'badge-warning' : 'badge-danger');
+                                                $statusText = $transaction->sisa <= 0 ? 'Lunas' : ($transaction->uang_muka > 0 ? 'DP' : 'Belum Lunas');
+                                            @endphp
+                                            <span class="badge {{ $statusClass }}">{{ $statusText }}</span>
+                                        @endif
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td class="text-center py-4">Tidak ada transaksi terbaru.</td>
+                                    <td class="text-center py-4" colspan="2">Tidak ada transaksi terbaru.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -187,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: labels,
             datasets: [
                 {
-                    label: 'Pendapatan',
+                    label: 'Pendapatan (Uang Masuk)',
                     data: incomeData,
                     backgroundColor: 'rgba(0, 123, 255, 0.7)',
                     borderColor: 'rgba(0, 123, 255, 1)',
@@ -251,3 +259,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+

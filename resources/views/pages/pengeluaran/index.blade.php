@@ -23,42 +23,64 @@
                     <i class="fas fa-list-alt mr-2"></i>Daftar Pengeluaran
                 </h3>
                 <div class="card-tools">
-                    <a href="{{ route('pengeluaran.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus mr-1"></i> Tambah Pengeluaran
-                    </a>
-                    <a href="{{ route('pengeluaran.export.excel', request()->query()) }}" class="btn btn-success btn-sm mr-2">
+                    <a href="{{ route('pengeluaran.export.excel', request()->query()) }}" class="btn btn-success btn-sm">
                         <i class="fas fa-file-excel mr-1"></i> Ekspor Excel
+                    </a>
+                    <a href="{{ route('pengeluaran.create') }}" class="btn btn-primary btn-sm ml-2">
+                        <i class="fas fa-plus mr-1"></i> Tambah Pengeluaran
                     </a>
                 </div>
             </div>
             <div class="card-body">
                 {{-- Form Filter --}}
                 <form action="{{ route('pengeluaran.index') }}" method="GET" class="mb-4">
-                    <div class="form-row">
-                        <div class="col-md-3 mb-2">
-                            <label for="search_query">Cari Keterangan</label>
-                            <input type="text" name="search_query" id="search_query" class="form-control" placeholder="Masukkan keterangan" value="{{ request('search_query') }}">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="form-group">
+                                <label for="search_query">Cari Keterangan</label>
+                                <input type="text" name="search_query" id="search_query" class="form-control" placeholder="Masukkan keterangan..." value="{{ request('search_query') }}">
+                            </div>
                         </div>
-                        <div class="col-md-auto mb-2">
-                            <label for="jenis_pengeluaran">Jenis Pengeluaran</label>
-                            <select name="jenis_pengeluaran" id="jenis_pengeluaran" class="form-control">
-                                <option value="">Semua Jenis</option>
-                                <option value="Operasional" {{ request('jenis_pengeluaran') == 'Operasional' ? 'selected' : '' }}>Operasional</option>
-                                <option value="Kasbon Karyawan" {{ request('jenis_pengeluaran') == 'Kasbon Karyawan' ? 'selected' : '' }}>Kasbon Karyawan</option>
-                                <option value="Lainnya" {{ request('jenis_pengeluaran') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
-                            </select>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="form-group">
+                                <label for="jenis_pengeluaran">Jenis Pengeluaran</label>
+                                <select name="jenis_pengeluaran" id="jenis_pengeluaran" class="form-control">
+                                    <option value="">Semua Jenis</option>
+                                    {{-- Opsi disesuaikan dengan form create/edit --}}
+                                    <option value="Uang Makan" {{ request('jenis_pengeluaran') == 'Uang Makan' ? 'selected' : '' }}>Uang Makan</option>
+                                    <option value="Token Listrik" {{ request('jenis_pengeluaran') == 'Token Listrik' ? 'selected' : '' }}>Token Listrik</option>
+                                    <option value="Air PDAM" {{ request('jenis_pengeluaran') == 'Air PDAM' ? 'selected' : '' }}>Air PDAM</option>
+                                    <option value="Modal" {{ request('jenis_pengeluaran') == 'Modal' ? 'selected' : '' }}>Modal</option>
+                                    <option value="Gaji Karyawan" {{ request('jenis_pengeluaran') == 'Gaji Karyawan' ? 'selected' : '' }}>Gaji Karyawan</option>
+                                    <option value="Beli Bahan" {{ request('jenis_pengeluaran') == 'Beli Bahan' ? 'selected' : '' }}>Beli Bahan</option>
+                                    <option value="Sumbangan" {{ request('jenis_pengeluaran') == 'Sumbangan' ? 'selected' : '' }}>Sumbangan</option>
+                                    <option value="Paket COD" {{ request('jenis_pengeluaran') == 'Paket COD' ? 'selected' : '' }}>Paket COD</option>
+                                    <option value="Perlengkapan" {{ request('jenis_pengeluaran') == 'Perlengkapan' ? 'selected' : '' }}>Perlengkapan</option>
+                                    <option value="Transportasi" {{ request('jenis_pengeluaran') == 'Transportasi' ? 'selected' : '' }}>Transportasi</option>
+                                    <option value="Lain-lain" {{ request('jenis_pengeluaran') == 'Lain-lain' ? 'selected' : '' }}>Lain-lain</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-auto mb-2">
-                            <label for="start_date">Dari Tanggal</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
+                        <div class="col-lg-2 col-md-6">
+                            <div class="form-group">
+                                <label for="start_date">Dari Tanggal</label>
+                                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
+                            </div>
                         </div>
-                        <div class="col-md-auto mb-2">
-                            <label for="end_date">Sampai Tanggal</label>
-                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
+                        <div class="col-lg-2 col-md-6">
+                             <div class="form-group">
+                                <label for="end_date">Sampai Tanggal</label>
+                                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
+                            </div>
                         </div>
-                        <div class="col-md-auto mb-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-info"><i class="fas fa-search"></i> Cari</button>
-                            <a href="{{ route('pengeluaran.index') }}" class="btn btn-secondary ml-2"><i class="fas fa-sync-alt"></i> Reset</a>
+                        <div class="col-lg-2 col-md-12">
+                             <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="d-flex">
+                                    <button type="submit" class="btn btn-primary flex-grow-1"><i class="fas fa-search"></i> Cari</button>
+                                    <a href="{{ route('pengeluaran.index') }}" class="btn btn-secondary ml-2" title="Reset Filter"><i class="fas fa-sync-alt"></i></a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -70,8 +92,7 @@
                                 <th style="width: 5%;">No</th>
                                 <th>Keterangan</th>
                                 <th>Jenis</th>
-                                <th>Karyawan (Kasbon)</th>
-                                <th>Total</th>
+                                <th class="text-right">Total</th>
                                 <th>Tanggal</th>
                                 <th style="width: 10%;" class="text-center">Aksi</th>
                             </tr>
@@ -82,18 +103,9 @@
                                 <td>{{ $loop->iteration + ($pengeluaran->currentPage() - 1) * $pengeluaran->perPage() }}</td>
                                 <td>{{ $item->keterangan }}</td>
                                 <td>
-                                    @php
-                                        $jenisClass = '';
-                                        switch ($item->jenis_pengeluaran) {
-                                            case 'Kasbon Karyawan': $jenisClass = 'badge-warning'; break;
-                                            case 'Operasional': $jenisClass = 'badge-info'; break;
-                                            default: $jenisClass = 'badge-secondary';
-                                        }
-                                    @endphp
-                                    <span class="badge {{ $jenisClass }}">{{ $item->jenis_pengeluaran }}</span>
+                                    <span class="badge badge-secondary">{{ $item->jenis_pengeluaran }}</span>
                                 </td>
-                                <td>{{ $item->karyawan->nama_karyawan ?? '-' }}</td>
-                                <td><strong>Rp{{ number_format($item->total, 0, ',', '.') }}</strong></td>
+                                <td class="text-right"><strong>Rp{{ number_format($item->total, 0, ',', '.') }}</strong></td>
                                 <td>{{ $item->created_at->format('d M Y') }}</td>
                                 <td class="text-center">
                                     <div class="btn-group" role="group">
@@ -108,15 +120,15 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center">Tidak ada data pengeluaran ditemukan.</td>
+                                <td colspan="6" class="text-center">Tidak ada data pengeluaran ditemukan.</td>
                             </tr>
                             @endforelse
                         </tbody>
                         @if($pengeluaran->isNotEmpty())
                         <tfoot class="bg-light">
                             <tr>
-                                <th colspan="4" class="text-right">Total Pengeluaran (Halaman Ini):</th>
-                                <th colspan="3">Rp{{ number_format($totalPengeluaran, 0, ',', '.') }}</th>
+                                <th colspan="3" class="text-right">Total Pengeluaran (Sesuai Filter):</th>
+                                <th class="text-right" colspan="3">Rp{{ number_format($totalPengeluaran, 0, ',', '.') }}</th>
                             </tr>
                         </tfoot>
                         @endif
@@ -124,7 +136,7 @@
                 </div>
 
                 <div class="d-flex justify-content-center mt-3">
-                    {{-- {{ $pengeluaran->appends(request()->query())->links() }} --}}
+                    {{ $pengeluaran->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>

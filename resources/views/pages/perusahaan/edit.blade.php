@@ -54,12 +54,12 @@
 @section('content_header')
 <div class="row mb-2">
     <div class="col-sm-6">
-        <h1 class="m-0"><i class="far fa-building mr-2"></i>Pengaturan Perusahaan</h1>
+        <h1 class="m-0"><i class="far fa-building mr-2"></i>Pengaturan Usaha</h1>
     </div>
     <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="{{ url('/dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Pengaturan Perusahaan</li>
+            <li class="breadcrumb-item active">Pengaturan Usaha</li>
         </ol>
     </div>
 </div>
@@ -94,10 +94,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="nama_perusahaan">Nama Perusahaan <span class="text-danger">*</span></label>
+                                        <label for="nama_perusahaan">Nama Usaha <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-building"></i></span></div>
-                                            <input type="text" name="nama_perusahaan" id="nama_perusahaan" class="form-control @error('nama_perusahaan') is-invalid @enderror" value="{{ old('nama_perusahaan', $perusahaan->nama_perusahaan) }}" placeholder="Contoh: PT. Maju Jaya" required>
+                                            {{-- PERBAIKAN: Tambahkan '?? ""' untuk menangani nilai null --}}
+                                            <input type="text" name="nama_perusahaan" id="nama_perusahaan" class="form-control @error('nama_perusahaan') is-invalid @enderror" value="{{ old('nama_perusahaan', $perusahaan->nama_perusahaan ?? '') }}" placeholder="Contoh: Agen BRILink Maju Jaya" required>
                                             @error('nama_perusahaan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
@@ -107,7 +108,8 @@
                                         <label for="email">Email <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-envelope"></i></span></div>
-                                            <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $perusahaan->email) }}" placeholder="contoh@perusahaan.com" required>
+                                            {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                            <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $perusahaan->email ?? '') }}" placeholder="contoh@email.com" required>
                                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
@@ -117,7 +119,8 @@
                                         <label for="no_handphone">No. Handphone</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-phone"></i></span></div>
-                                            <input type="text" name="no_handphone" id="no_handphone" class="form-control @error('no_handphone') is-invalid @enderror" value="{{ old('no_handphone', $perusahaan->no_handphone) }}" placeholder="081234567890">
+                                            {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                            <input type="text" name="no_handphone" id="no_handphone" class="form-control @error('no_handphone') is-invalid @enderror" value="{{ old('no_handphone', $perusahaan->no_handphone ?? '') }}" placeholder="081234567890">
                                             @error('no_handphone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
@@ -127,18 +130,19 @@
                                         <label for="instagram">Instagram</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i class="fab fa-instagram"></i></span></div>
-                                            <input type="text" name="instagram" id="instagram" class="form-control @error('instagram') is-invalid @enderror" value="{{ old('instagram', $perusahaan->instagram) }}" placeholder="Username tanpa '@'">
+                                            {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                            <input type="text" name="instagram" id="instagram" class="form-control @error('instagram') is-invalid @enderror" value="{{ old('instagram', $perusahaan->instagram ?? '') }}" placeholder="Username tanpa '@'">
                                             @error('instagram')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
                                 </div>
-                                {{-- PERBAIKAN: Mengubah input menjadi username saja --}}
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="facebook">Facebook</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i class="fab fa-facebook-f"></i></span></div>
-                                            <input type="text" name="facebook" id="facebook" class="form-control @error('facebook') is-invalid @enderror" value="{{ old('facebook', $perusahaan->facebook) }}" placeholder="Username Facebook">
+                                            {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                            <input type="text" name="facebook" id="facebook" class="form-control @error('facebook') is-invalid @enderror" value="{{ old('facebook', $perusahaan->facebook ?? '') }}" placeholder="Username Facebook">
                                             @error('facebook')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
@@ -148,7 +152,8 @@
                                         <label for="twitter">Twitter</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i class="fab fa-twitter"></i></span></div>
-                                            <input type="text" name="twitter" id="twitter" class="form-control @error('twitter') is-invalid @enderror" value="{{ old('twitter', $perusahaan->twitter) }}" placeholder="Username Twitter tanpa '@'">
+                                            {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                            <input type="text" name="twitter" id="twitter" class="form-control @error('twitter') is-invalid @enderror" value="{{ old('twitter', $perusahaan->twitter ?? '') }}" placeholder="Username Twitter tanpa '@'">
                                             @error('twitter')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
@@ -158,7 +163,8 @@
                                         <label for="youtube">YouTube</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend"><span class="input-group-text"><i class="fab fa-youtube"></i></span></div>
-                                            <input type="text" name="youtube" id="youtube" class="form-control @error('youtube') is-invalid @enderror" value="{{ old('youtube', $perusahaan->youtube) }}" placeholder="Nama Channel YouTube">
+                                            {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                            <input type="text" name="youtube" id="youtube" class="form-control @error('youtube') is-invalid @enderror" value="{{ old('youtube', $perusahaan->youtube ?? '') }}" placeholder="Nama Channel YouTube">
                                             @error('youtube')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         </div>
                                     </div>
@@ -166,14 +172,16 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="alamat">Alamat</label>
-                                        <textarea name="alamat" id="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3" placeholder="Masukkan alamat lengkap perusahaan">{{ old('alamat', $perusahaan->alamat) }}</textarea>
+                                        {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                        <textarea name="alamat" id="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3" placeholder="Masukkan alamat lengkap usaha">{{ old('alamat', $perusahaan->alamat ?? '') }}</textarea>
                                         @error('alamat')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="maps_url">Link Sematan Google Maps</label>
-                                        <textarea name="maps_url" id="maps_url" class="form-control @error('maps_url') is-invalid @enderror" rows="4" placeholder="Contoh: <iframe src=... ></iframe>">{{ old('maps_url', $perusahaan->maps_url) }}</textarea>
+                                        {{-- PERBAIKAN: Tambahkan '?? ""' --}}
+                                        <textarea name="maps_url" id="maps_url" class="form-control @error('maps_url') is-invalid @enderror" rows="4" placeholder="Contoh: <iframe src=... ></iframe>">{{ old('maps_url', $perusahaan->maps_url ?? '') }}</textarea>
                                         @error('maps_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                         <small class="form-text text-muted">
                                             Buka Google Maps > Cari lokasi Anda > Klik "Share" > Pilih "Embed a map" > Salin kode HTML dan tempel di sini.
@@ -187,14 +195,14 @@
                         <div class="tab-pane fade" id="tab-media-branding" role="tabpanel" aria-labelledby="tab-media-branding-tab">
                             <div class="row">
                                 @php
+                                    // PERBAIKAN: Gunakan helper optional() agar aman jika $perusahaan null saat di-loop
+                                    $perusahaanData = optional($perusahaan);
+                                    
                                     $imageFields = [
-                                        'logo' => ['label' => 'Logo Perusahaan', 'rekomendasi' => '1200x700 px'],
+                                        'logo' => ['label' => 'Logo Usaha', 'rekomendasi' => '1200x700 px'],
                                         'favicon' => ['label' => 'Favicon', 'rekomendasi' => '72x72 px'],
                                         'logo_login' => ['label' => 'Logo Halaman Login', 'rekomendasi' => '1200x700 px'],
-                                        'logo_lunas' => ['label' => 'Logo Stempel Lunas', 'rekomendasi' => '500x300 px'],
-                                        'logo_belum_lunas' => ['label' => 'Logo Stempel Belum Lunas', 'rekomendasi' => '500x300 px'],
-                                        'qr_code' => ['label' => 'QR Code', 'rekomendasi' => '700x700 px'],
-                                        'id_card_desain' => ['label' => 'Desain ID Card', 'rekomendasi' => 'Ukuran bebas'],
+                                        'qr_code' => ['label' => 'QR Code Pembayaran', 'rekomendasi' => '700x700 px'],
                                     ];
                                 @endphp
 
@@ -204,12 +212,14 @@
                                     <label for="{{ $field }}" class="image-upload-container">
                                         <input type="file" name="{{ $field }}" id="{{ $field }}" class="@error($field) is-invalid @enderror" onchange="previewImage(this, '{{ $field }}-preview', '{{ $field }}-prompt')">
                                         
-                                        <div id="{{ $field }}-prompt" class="upload-prompt {{ $perusahaan->{$field} ? 'd-none' : '' }}">
+                                        {{-- PERBAIKAN: Gunakan $perusahaanData yang sudah aman dari null --}}
+                                        <div id="{{ $field }}-prompt" class="upload-prompt {{ $perusahaanData->{$field} ? 'd-none' : '' }}">
                                             <i class="fas fa-cloud-upload-alt upload-icon"></i>
                                             <p class="upload-text">Klik untuk memilih gambar</p>
                                         </div>
                                         
-                                        <img id="{{ $field }}-preview" src="{{ $perusahaan->{$field} ? asset('storage/' . $perusahaan->{$field}) : '' }}" class="image-preview {{ $perusahaan->{$field} ? '' : 'd-none' }}">
+                                        {{-- PERBAIKAN: Gunakan $perusahaanData yang sudah aman dari null --}}
+                                        <img id="{{ $field }}-preview" src="{{ $perusahaanData->{$field} ? asset('storage/' . $perusahaanData->{$field}) : '' }}" class="image-preview {{ $perusahaanData->{$field} ? '' : 'd-none' }}">
                                     </label>
                                     <small class="form-text text-muted">Rekomendasi: {{ $details['rekomendasi'] }}, Maks 5MB.</small>
                                     @error($field)<div class="invalid-feedback d-block">{{ $message }}</div>@enderror

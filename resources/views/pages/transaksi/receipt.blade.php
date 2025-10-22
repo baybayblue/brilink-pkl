@@ -18,7 +18,6 @@
 
         .receipt-container {
             max-width: 320px;
-            /* Lebar struk thermal printer */
             margin: 30px auto;
             background: #fff;
             padding: 20px;
@@ -159,9 +158,8 @@
                 <img src="{{ asset('storage/' . $perusahaan->logo) }}" alt="Logo Perusahaan">
             @endif
             <h5>{{ $perusahaan->nama_perusahaan ?? 'Nama Perusahaan Anda' }}</h5>
-            {{-- PERUBAHAN DI SINI --}}
-            <p><i class="fas fa-map-marker-alt fa-fw mr-1"></i>{{ $perusahaan->alamat ?? 'Alamat Perusahaan Anda' }}</p>
-            <p><i class="fas fa-phone-alt fa-fw mr-1"></i>Telp: {{ $perusahaan->no_handphone ?? '-' }}</p>
+            <p>{{ $perusahaan->alamat ?? 'Alamat Perusahaan Anda' }}</p>
+            <p>Telp: {{ $perusahaan->no_handphone ?? '-' }}</p>
         </div>
 
         <div class="divider"></div>
@@ -175,63 +173,103 @@
                 <div class="col-5">Pelanggan</div>
                 <div class="col-7">: {{ $transaksi->pelanggan->nama ?? 'Umum' }}</div>
                 <div class="col-5">Kasir</div>
-                <div class="col-7">: {{ Auth::user()->username ?? 'N/A' }}</div>
+                <div class="col-7">: {{ Auth::user()->name ?? 'N/A' }}</div>
             </div>
         </div>
 
         <div class="divider"></div>
 
+        {{-- ======================================================= --}}
+        {{--     MODIFIKASI UTAMA: MENAMPILKAN DETAIL BERDASARKAN TIPE --}}
+        {{-- ======================================================= --}}
         <table class="table-products">
             <thead>
                 <tr>
-                    <th>Produk</th>
+                    <th>Deskripsi</th>
                     <th class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($transaksi->transaksiDetails as $detail)
+                @if($transaksi->tipe_transaksi == 'brilink')
+                    {{-- TAMPILAN UNTUK BRILINK --}}
                     <tr>
                         <td class="product-name">
-                            {{ $detail->nama_produk }}
-                            <div style="font-family: 'Source Code Pro', monospace;">{{ $detail->qty }}
-                                {{ $detail->satuan }} x {{ number_format($detail->harga, 0, ',', '.') }}</div>
+                            {{-- Menggabungkan jenis dan tujuan untuk deskripsi yang jelas --}}
+                            {{ ucwords(str_replace('_', ' ', $transaksi->detail_brilink['jenis'] ?? 'Transaksi')) }}
+                            {{ $transaksi->detail_brilink['bank_tujuan'] ? 'ke ' . $transaksi->detail_brilink['bank_tujuan'] : '' }}
+                            <div style="font-family: 'Source Code Pro', monospace;">
+                                {{ $transaksi->detail_brilink['no_rekening'] ?? '' }}
+                            </div>
                         </td>
-                        <td class="text-right">{{ number_format($detail->total, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format($transaksi->detail_brilink['nominal'] ?? 0, 0, ',', '.') }}</td>
                     </tr>
-                @endforeach
+                    <tr>
+                        <td class="product-name">
+                            Biaya Admin
+                        </td>
+                        <td class="text-right">{{ number_format($transaksi->detail_brilink['admin'] ?? 0, 0, ',', '.') }}</td>
+                    </tr>
+
+                @else
+                    {{-- TAMPILAN UNTUK JASA/PRODUK (KODE LAMA ANDA) --}}
+                    @foreach ($transaksi->transaksiDetails as $detail)
+                        <tr>
+                            <td class="product-name">
+                                {{ $detail->nama_produk }}
+                                <div style="font-family: 'Source Code Pro', monospace;">{{ $detail->qty }}
+                                    {{ $detail->satuan }} x {{ number_format($detail->harga, 0, ',', '.') }}</div>
+                            </td>
+                            <td class="text-right">{{ number_format($detail->total, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                @endif
             </tbody>
         </table>
 
         <div class="divider"></div>
 
+        {{-- ======================================================= --}}
+        {{--     MODIFIKASI UTAMA: MENAMPILKAN SUMMARY BERDASARKAN TIPE --}}
+        {{-- ======================================================= --}}
         <table class="summary-table">
-            <tr>
-                <td>Subtotal</td>
-                <td class="text-right">Rp{{ number_format($transaksi->total + $transaksi->diskon, 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td>Diskon</td>
-                <td class="text-right">Rp{{ number_format($transaksi->diskon, 0, ',', '.') }}</td>
-            </tr>
-            <tr class="total-label">
-                <td>Total</td>
-                <td class="text-right total-amount">Rp{{ number_format($transaksi->total, 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td>Uang Muka/Bayar</td>
-                <td class="text-right">Rp{{ number_format($transaksi->uang_muka, 0, ',', '.') }}</td>
-            </tr>
-            <tr class="total-label">
-                <td>Sisa</td>
-                <td class="text-right total-amount">Rp{{ number_format($transaksi->sisa, 0, ',', '.') }}</td>
-            </tr>
+            @if($transaksi->tipe_transaksi == 'brilink')
+                {{-- SUMMARY SEDERHANA UNTUK BRILINK --}}
+                <tr class="total-label">
+                    <td>Total Bayar</td>
+                    <td class="text-right total-amount">Rp{{ number_format($transaksi->total, 0, ',', '.') }}</td>
+                </tr>
+            @else
+                {{-- SUMMARY LENGKAP UNTUK JASA/PRODUK (KODE LAMA ANDA) --}}
+                <tr>
+                    <td>Subtotal</td>
+                    <td class="text-right">Rp{{ number_format($transaksi->total + $transaksi->diskon, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>Diskon</td>
+                    <td class="text-right">Rp{{ number_format($transaksi->diskon, 0, ',', '.') }}</td>
+                </tr>
+                <tr class="total-label">
+                    <td>Total</td>
+                    <td class="text-right total-amount">Rp{{ number_format($transaksi->total, 0, ',', '.') }}</td>
+                </tr>
+                <tr>
+                    <td>Uang Muka/Bayar</td>
+                    <td class="text-right">Rp{{ number_format($transaksi->uang_muka, 0, ',', '.') }}</td>
+                </tr>
+                <tr class="total-label">
+                    <td>Sisa</td>
+                    <td class="text-right total-amount">Rp{{ number_format($transaksi->sisa, 0, ',', '.') }}</td>
+                </tr>
+            @endif
         </table>
 
         <div class="divider"></div>
 
         <div class="footer-text">
             <p>Terima kasih atas kunjungan Anda!</p>
-            <p>Barang yang sudah dibeli tidak dapat dikembalikan.</p>
+            @if($transaksi->tipe_transaksi != 'brilink')
+                <p>Barang yang sudah dibeli tidak dapat dikembalikan.</p>
+            @endif
         </div>
     </div>
 

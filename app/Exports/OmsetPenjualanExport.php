@@ -2,60 +2,52 @@
 
 namespace App\Exports;
 
-use App\Models\TransaksiDetail; // Ganti dengan model detail transaksi Anda
-use Maatwebsite\Excel\Concerns\FromQuery;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class OmsetPenjualanExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting, WithStyles
+class OmsetPenjualanExport implements
+    FromCollection,
+    WithHeadings,
+    WithMapping,
+    ShouldAutoSize,
+    WithColumnFormatting,
+    WithStyles,
+    WithEvents
 {
-    protected $filters;
+    protected Collection $omsetData;
+    protected float $subtotalOmset;
+    protected string $selectedMonth;
     private int $rowNumber = 0;
 
     /**
-     * @param array|\Illuminate\Support\Collection $filters Filter dari request (produk_id, bulan).
+     * @param \Illuminate\Support\Collection $omsetData      Data gabungan omset produk dan BRILink.
+     * @param float                            $subtotalOmset  Total keseluruhan omset.
+     * @param string                           $selectedMonth  Bulan yang difilter (format Y-m).
      */
-    public function __construct($filters)
+    public function __construct(Collection $omsetData, float $subtotalOmset, string $selectedMonth)
     {
-        $this->filters = $filters;
+        $this->omsetData = $omsetData;
+        $this->subtotalOmset = $subtotalOmset;
+        $this->selectedMonth = $selectedMonth;
     }
 
     /**
-     * Query untuk mengambil data omset penjualan produk.
+     * Mengembalikan koleksi data yang akan diekspor.
      *
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return \Illuminate\Support\Collection
      */
-    public function query()
+    public function collection()
     {
-        // Asumsi: Model TransaksiDetail memiliki relasi 'produk'
-        // CATATAN: Pastikan nama kolom untuk jumlah/kuantitas sudah benar.
-        // Error sebelumnya menunjukkan kolom 'jumlah' tidak ditemukan.
-        // Saya mengubahnya menjadi 'qty'. Sesuaikan jika nama kolom Anda berbeda (misalnya: quantity, jumlah_item, dll).
-        $query = TransaksiDetail::with('produk')
-            ->selectRaw('produk_id, SUM(qty) as jumlah_terjual, SUM(total) as total_omset')
-            ->groupBy('produk_id')
-            ->orderByRaw('SUM(total) DESC');
-
-        // Filter berdasarkan produk
-        $query->when($this->filters['produk_id'] ?? null, function ($q, $produkId) {
-            if ($produkId !== 'all') {
-                return $q->where('produk_id', $produkId);
-            }
-        });
-
-        // Filter berdasarkan bulan dan tahun
-        $query->when($this->filters['bulan'] ?? null, function ($q, $bulan) {
-            // $bulan formatnya 'YYYY-MM'
-            [$year, $month] = explode('-', $bulan);
-            return $q->whereYear('created_at', $year)->whereMonth('created_at', $month);
-        });
-
-        return $query;
+        return $this->omsetData;
     }
 
     /**
@@ -67,9 +59,9 @@ class OmsetPenjualanExport implements FromQuery, WithHeadings, WithMapping, Shou
     {
         return [
             'No',
-            'Nama Produk',
-            'Jumlah Terjual',
-            'Total Omset',
+            'Produk / Layanan',
+            'Jumlah Transaksi',
+            'Total Omset (Keuntungan Admin)',
         ];
     }
 
@@ -83,9 +75,9 @@ class OmsetPenjualanExport implements FromQuery, WithHeadings, WithMapping, Shou
     {
         return [
             ++$this->rowNumber,
-            $row->produk?->nama ?? 'Produk Tidak Ditemukan',
-            $row->jumlah_terjual,
-            $row->total_omset,
+            $row['nama_item'] ?? '-',
+            $row['jumlah'] ?? 0,
+            $row['total'] ?? 0,
         ];
     }
 
@@ -97,8 +89,8 @@ class OmsetPenjualanExport implements FromQuery, WithHeadings, WithMapping, Shou
     public function columnFormats(): array
     {
         return [
-            'C' => NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1, // Format untuk Jumlah
-            'D' => '"Rp"#,##0', // Format Rupiah untuk Total Omset
+            'C' => NumberFormat::FORMAT_NUMBER,       // Format untuk Jumlah
+            'D' => '"Rp"#,##0',                     // Format Rupiah untuk Total Omset
         ];
     }
 
@@ -112,6 +104,43 @@ class OmsetPenjualanExport implements FromQuery, WithHeadings, WithMapping, Shou
         return [
             // Membuat header (baris 1) menjadi bold.
             1 => ['font' => ['bold' => true]],
+        ];
+    }
+
+    /**
+     * Menambahkan baris total di akhir sheet.
+     *
+     * @return array
+     */
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function(AfterSheet $event) {
+                // Dapatkan baris terakhir setelah semua data ditulis
+                $lastRow = $this->rowNumber + 2; // +1 untuk header, +1 untuk spasi
+
+                // Hitung total keuntungan admin saja
+                $totalAdminFee = $this->omsetData
+                    ->where('tipe', 'brilink')
+                    ->sum('total');
+                
+                // Tambahkan baris untuk total keuntungan admin jika ada
+                if ($totalAdminFee > 0) {
+                    $event->sheet->setCellValue("C{$lastRow}", 'Total Keuntungan Admin:');
+                    $event->sheet->setCellValue("D{$lastRow}", $totalAdminFee);
+                    $event->sheet->getStyle("C{$lastRow}:D{$lastRow}")->getFont()->setBold(true);
+                    $lastRow++; // Pindah ke baris berikutnya
+                }
+
+                // Tambahkan baris untuk subtotal keseluruhan
+                $event->sheet->setCellValue("C{$lastRow}", 'Total Omset Keseluruhan:');
+                $event->sheet->setCellValue("D{$lastRow}", $this->subtotalOmset);
+                $event->sheet->getStyle("C{$lastRow}:D{$lastRow}")->getFont()->setBold(true);
+
+                // Menerapkan format Rupiah ke sel total
+                $event->sheet->getStyle("D" . ($lastRow - 1))->getNumberFormat()->setFormatCode('"Rp"#,##0');
+                $event->sheet->getStyle("D{$lastRow}")->getNumberFormat()->setFormatCode('"Rp"#,##0');
+            },
         ];
     }
 }

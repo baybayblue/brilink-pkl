@@ -21,10 +21,17 @@ class Transaksi extends Model
         'sisa',
         'uang_muka',
         'status_pengerjaan',
-        'metode_pembayaran',
-        'bukti_pembayaran',
-        'rekening_id',
-        'keterangan_pembayaran',
+        'metode_pembayaran', // Kolom Anda yang sudah ada
+        'bukti_pembayaran',  // Kolom Anda yang sudah ada
+        'rekening_id',       // Kolom Anda yang sudah ada
+        'keterangan_pembayaran', // Kolom Anda yang sudah ada
+        'id_pelunasan',      // Dari migrasi lama Anda
+
+        // --- KOLOM BARU YANG DITAMBAHKAN ---
+        'tipe_transaksi',
+        'status_pembayaran',
+        'detail_brilink',
+        // ---------------------------------
     ];
 
     protected $casts = [
@@ -33,6 +40,10 @@ class Transaksi extends Model
         'total' => 'decimal:2',
         'diskon' => 'decimal:2',
         'sisa' => 'decimal:2',
+
+        // --- CASTS BARU UNTUK KOLOM JSON ---
+        'detail_brilink' => 'array',
+        // -----------------------------------
     ];
 
     public function pelanggan()

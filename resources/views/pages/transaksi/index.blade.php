@@ -36,16 +36,27 @@
                     <div class="form-row">
                         <div class="col-md-auto mb-2">
                             <label for="search_query">Cari (Pelanggan / No. Order)</label>
-                            <input type="text" name="search_query" id="search_query" class="form-control" placeholder="Nama atau No. Order" value="{{ $searchQuery ?? '' }}">
+                            <input type="text" name="search_query" id="search_query" class="form-control" placeholder="Nama atau No. Order" value="{{ request('search_query') }}">
                         </div>
                         <div class="col-md-auto mb-2">
                             <label for="start_date">Dari Tanggal</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ $startDate ?? '' }}">
+                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
                         </div>
                         <div class="col-md-auto mb-2">
                             <label for="end_date">Sampai Tanggal</label>
-                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ $endDate ?? '' }}">
+                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
                         </div>
+                        
+                        {{-- BARU: Filter berdasarkan Tipe Transaksi --}}
+                        <div class="col-md-auto mb-2">
+                            <label for="tipe_transaksi">Tipe Transaksi</label>
+                            <select name="tipe_transaksi" id="tipe_transaksi" class="form-control">
+                                <option value="">Semua Tipe</option>
+                                <option value="jasa_produk" {{ request('tipe_transaksi') == 'jasa_produk' ? 'selected' : '' }}>Jasa / Produk</option>
+                                <option value="brilink" {{ request('tipe_transaksi') == 'brilink' ? 'selected' : '' }}>BRILink</option>
+                            </select>
+                        </div>
+                        
                         <div class="col-md-auto mb-2">
                             <label for="limit">Limit</label>
                             <select name="limit" id="limit" class="form-control" onchange="this.form.submit()">
@@ -82,12 +93,16 @@
                                 <td>
                                     <strong>{{ $item->no_transaksi }}</strong>
                                     <small class="d-block text-muted">{{ $item->tanggal_order->format('d M Y') }}</small>
+                                    
+                                    @if($item->tipe_transaksi == 'brilink')
+                                        <span class="badge badge-info mt-1"><i class="fas fa-university mr-1"></i> BRILink</span>
+                                    @endif
                                 </td>
                                 <td>{{ $item->pelanggan->nama ?? 'Umum' }}</td>
                                 <td>Rp{{ number_format($item->total, 0, ',', '.') }}</td>
                                 <td><strong>Rp{{ number_format($item->sisa, 0, ',', '.') }}</strong></td>
                                 <td>
-                                    @if ($item->sisa <= 0)
+                                    @if($item->status_pembayaran == 'lunas' || $item->sisa <= 0)
                                         <span class="badge badge-success">LUNAS</span>
                                     @else
                                         <span class="badge badge-warning">BELUM LUNAS</span>
@@ -114,13 +129,20 @@
                                         </button>
                                     @endif
                                     <div class="btn-group">
-                                        <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
+                                        @if($item->tipe_transaksi != 'brilink')
+                                            <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
+                                        @endif
+                                        
                                         <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="fas fa-cog"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right">
                                             <a class="dropdown-item" href="{{ route('transaksi.print-receipt', $item->id) }}" target="_blank"><i class="fas fa-print fa-fw mr-2"></i>Cetak Struk</a>
-                                            <a class="dropdown-item" href="{{ route('transaksi.print-invoice', $item->id) }}" target="_blank"><i class="fas fa-file-invoice fa-fw mr-2"></i>Cetak Invoice</a>
+                                            
+                                            @if($item->tipe_transaksi != 'brilink')
+                                                <a class="dropdown-item" href="{{ route('transaksi.print-invoice', $item->id) }}" target="_blank"><i class="fas fa-file-invoice fa-fw mr-2"></i>Cetak Invoice</a>
+                                            @endif
+                                            
                                             <div class="dropdown-divider"></div>
                                             <button class="dropdown-item text-danger" type="button" onclick="confirmDelete('{{ $item->id }}', '{{ $item->no_transaksi }}')">
                                                 <i class="fas fa-trash-alt fa-fw mr-2"></i>Hapus Transaksi
@@ -154,6 +176,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="pelunasanModal" tabindex="-1" role="dialog" aria-labelledby="pelunasanModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -193,10 +216,6 @@
                                 <input class="form-check-input" type="radio" name="metode_pembayaran" id="metode_transfer" value="transfer_bank">
                                 <label class="form-check-label" for="metode_transfer">Transfer Bank</label>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="metode_pembayaran" id="metode_qris" value="qris">
-                                <label class="form-check-label" for="metode_qris">QRIS</label>
-                            </div>
                         </div>
                     </div>
 
@@ -205,7 +224,7 @@
                             <label for="rekening_id">Pilih Bank</label>
                             <select name="rekening_id" id="rekening_id" class="form-control @error('rekening_id') is-invalid @enderror">
                                 <option value="">Pilih Rekening Bank</option>
-                                @foreach($rekening as $rek)
+                                @foreach($rekening ?? [] as $rek) 
                                     <option value="{{ $rek->id }}">{{ $rek->bank }} - {{ $rek->nomor_rekening }} ({{ $rek->atas_nama }})</option>
                                 @endforeach
                             </select>
@@ -215,13 +234,6 @@
                             <label for="bukti_pembayaran">Upload Bukti Pembayaran</label>
                             <input type="file" name="bukti_pembayaran" id="bukti_pembayaran" class="form-control-file @error('bukti_pembayaran') is-invalid @enderror">
                             @error('bukti_pembayaran')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                        </div>
-                    </div>
-
-                    <div id="qris_fields" style="display: none;">
-                        <div class="form-group text-center">
-                            <label>Scan QRIS untuk Pembayaran</label>
-                            <img id="qrisImage" src="{{ $perusahaan->qr_code ? asset('storage/' . $perusahaan->qr_code) : 'https://placehold.co/200x200/cccccc/333333?text=QRIS+Not+Available' }}" alt="QRIS Code" class="img-fluid" style="max-width: 200px; margin: 0 auto;">
                         </div>
                     </div>
 
@@ -293,23 +305,25 @@
 
     const metodePembayaranRadios = document.querySelectorAll('input[name="metode_pembayaran"]');
     const transferFieldsDiv = document.getElementById('transfer_fields');
-    const qrisFieldsDiv = document.getElementById('qris_fields');
     const buktiPembayaranInput = document.getElementById('bukti_pembayaran');
     const rekeningIdSelect = document.getElementById('rekening_id');
 
     function togglePaymentFields() {
-        const selectedMethod = document.querySelector('input[name="metode_pembayaran"]:checked').value;
+        // Cek dulu apakah elemennya ada sebelum mengakses value-nya
+        const selectedMethodRadio = document.querySelector('input[name="metode_pembayaran"]:checked');
+        if (!selectedMethodRadio) return; // Keluar jika tidak ada yang terpilih
+
+        const selectedMethod = selectedMethodRadio.value;
         transferFieldsDiv.style.display = 'none';
-        qrisFieldsDiv.style.display = 'none';
-        buktiPembayaranInput.removeAttribute('required');
-        rekeningIdSelect.removeAttribute('required');
+        
+        // Pastikan elemen ada sebelum mengubah atribut
+        if (buktiPembayaranInput) buktiPembayaranInput.removeAttribute('required');
+        if (rekeningIdSelect) rekeningIdSelect.removeAttribute('required');
 
         if (selectedMethod === 'transfer_bank') {
             transferFieldsDiv.style.display = 'block';
-            buktiPembayaranInput.setAttribute('required', 'required');
-            rekeningIdSelect.setAttribute('required', 'required');
-        } else if (selectedMethod === 'qris') {
-            qrisFieldsDiv.style.display = 'block';
+            if (buktiPembayaranInput) buktiPembayaranInput.setAttribute('required', 'required');
+            if (rekeningIdSelect) rekeningIdSelect.setAttribute('required', 'required');
         }
     }
 
@@ -318,3 +332,4 @@
     });
 </script>
 @endpush
+
